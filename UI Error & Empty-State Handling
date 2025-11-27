@@ -1,0 +1,9 @@
+uploaded = st.file_uploader("Upload OHLCV CSV", type=["csv"])
+if uploaded is None:
+    st.info("Please upload a CSV file with at least 'timestamp' and 'close' columns.")
+    st.stop()
+
+df = pd.read_csv(uploaded)
+if 'close' not in df.columns:
+    st.error("Uploaded file must contain a 'close' column.")
+    st.stop()
