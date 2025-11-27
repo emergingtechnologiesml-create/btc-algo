@@ -1,0 +1,6 @@
+DATA_PATH = "btc_enhanced_labeled_1d_causal.csv"
+df = pd.read_csv(DATA_PATH, parse_dates=["timestamp"])
+df = df.set_index("timestamp").sort_index()
+
+print("Loaded labeled dataset:")
+print(df[["ret_fwd", "label", "vol_bucket"]].head())
