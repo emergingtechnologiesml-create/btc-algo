@@ -1,0 +1,244 @@
+def run_indicator_engine(config: dict):
+print("\n[DEBUG] Starting run_indicator_engine...")
+symbol = config.get("symbol", "BTCUSDT")
+interval = config.get("interval")
+limit = int(config.get("limit", 365))
+indicator = str(config.get("indicator", "")).strip()
+ohlcv_data = config.get("ohlcv")
+print(f"[DEBUG] Config: symbol={symbol}, interval={interval}, limit={limit}, indicator={indicator}")
+
+try:
+N = int(config.get("donchian_period", 20))
+except (TypeError, ValueError):
+N = 20
+
+df = pd.DataFrame(ohlcv_data) if ohlcv_data is not None else fetch_ohlcv(symbol, interval, limit)
+df = clean_dataframe(df)
+print(f"[DEBUG] Data loaded, columns: {df.columns.tolist()}, shape: {df.shape}")
+print(df.head(3))
+
+if "close" not in df.columns:
+raise ValueError("Missing ‘close’ column in OHLCV data. Check the data source.")
+
+matched_patterns : list[dict] = []
+all_individual_patterns : list[dict] = []
+
+if indicator == "MACD":
+df = compute_macd(df)
+matched_patterns = check_macd_patterns(df)
+print(f"[DEBUG] MACD matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "Bollinger Bands":
+df = compute_bollinger_bands(df)
+matched_patterns = check_bb_patterns(df)
+print(f"[DEBUG] Bollinger Bands matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "RSI":
+df["rsi"] = compute_rsi(df["close"])
+matched_patterns = check_rsi_patterns(df)
+print(f"[DEBUG] RSI matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "Donchian Channels":
+df["upper_band"], df["lower_band"], df["middle_channel"] = compute_donchian(df, N)
+matched_patterns = check_donchian_patterns(df, N)
+print(f"[DEBUG] Donchian Channels matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "VWAP":
+df = df.join(compute_vwap(df))
+matched_patterns = check_vwap_patterns(df)
+print(f"[DEBUG] VWAP matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "OBV":
+df = compute_obv(df)
+matched_patterns = check_obv_patterns(df)
+print(f"[DEBUG] OBV matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "Ichimoku":
+df = compute_ichimoku(df)
+matched_patterns = check_ichimoku_patterns(df)
+print(f"[DEBUG] Ichimoku matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "StochRSI":
+df = compute_stochrsi(df)
+matched_patterns = check_stochrsi_patterns(df)
+print(f"[DEBUG] StochRSI matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "Price-Action":
+df = compute_priceaction(df)
+matched_patterns = check_price_action_patterns(df)
+print(f"[DEBUG] Price-Action matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "EMA":
+df = compute_ema(df)
+matched_patterns = check_ema_patterns(df)
+print(f"[DEBUG] EMA matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "Keltner Channel":
+df = compute_keltner_channels(df)
+matched_patterns = check_keltner_patterns(df)
+print(f"[DEBUG] Keltner Channel matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "ATR":
+df = compute_atr(df)
+matched_patterns = check_atr_patterns(df)
+print(f"[DEBUG] ATR matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "Pivot Points":
+df = compute_pivot_points(df)
+matched_patterns = check_pivot_patterns(df)
+print(f"[DEBUG] Pivot Points matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "Heikin Ashi":
+df = compute_heikin_ashi(df)
+matched_patterns = check_heikin_ashi_patterns(df)
+print(f"[DEBUG] Heikin Ashi matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "Volume Delta":
+df = compute_volume_delta(df)
+matched_patterns = check_volume_delta_patterns(df)
+print(f"[DEBUG] Volume Delta matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "TSI":
+df = compute_tsi(df)
+matched_patterns = check_tsi_patterns(df)
+print(f"[DEBUG] TSI matched patterns: {[p.get('pattern_name','') for p in matched_patterns]}")
+elif indicator == "Confluence":
+df["rsi"] = compute_rsi(df["close"])
+df = compute_macd(df)
+df = compute_pivot_points(df)
+df = compute_obv(df)
+df = compute_atr(df)
+df = compute_stochrsi(df)
+df["upper_band"], df["lower_band"], df["middle_channel"] = compute_donchian(df, N)
+df["vwap"] = compute_vwap(df)
+df = compute_heikin_ashi(df)
+df = compute_bollinger_bands(df)
+df = compute_keltner_channels(df)
+df = compute_volume_delta(df)
+df = compute_priceaction(df)
+matched_rsi = check_rsi_patterns(df)
+matched_macd = check_macd_patterns(df)
+matched_pivot = check_pivot_patterns(df)
+matched_obv = check_obv_patterns(df)
+matched_atr = check_atr_patterns(df)
+matched_stochrsi = check_stochrsi_patterns(df)
+matched_donchian = check_donchian_patterns(df, N)
+matched_vwap = check_vwap_patterns(df)
+matched_heikin = check_heikin_ashi_patterns(df)
+matched_bb = check_bb_patterns(df)
+matched_keltner = check_keltner_patterns(df)
+matched_volume_delta = check_volume_delta_patterns(df)
+matched_price_action = check_price_action_patterns(df)
+all_individual_patterns = (
+matched_rsi + matched_macd + matched_pivot + matched_obv +
+matched_atr + matched_stochrsi + matched_donchian + matched_vwap +
+matched_heikin + matched_bb + matched_keltner +
+matched_volume_delta + matched_price_action
+)
+pattern_names = [p["pattern_name"] for p in all_individual_patterns if "pattern_name" in p]
+print(f"[DEBUG] All patterns detected (confluence): {pattern_names}")
+pattern_to_indicator_mapping = build_pattern_to_indicator_mapping()
+indicator_weights = get_indicator_weights_for_timeframe(interval) # 'interval' is "1h", "4h", "1d", etc.
+print(f"[DEBUG] Passing adaptive weights to scoring (see above).")
+
+# ========== Main confluence scoring ================
+score_data = evaluate_confluence_score(
+pattern_names,
+pattern_to_indicator_mapping,
+indicator_weights
+)
+
+# ========== Conflict Penalty Applied ===============
+# You MUST pass in validated_patterns (pattern_names here), mapping, weights, and label_dir function
+# label_dir must be the same as in evaluate_confluence_score for direction logic consistency
+# If not exported, you can copy label_dir definition from your confluence code here
+
+def label_dir(txt: str) -> str:
+t = txt.lower()
+bullish_keywords = [
+"bullish", "support", "bounce", "up", "rising", "green",
+"oversold", "< 30", "< 35", "divergence up", "breakout",
+"hold", "golden cross", "higher low"
+]
+bearish_keywords = [
+"bearish", "resistance", "rejection", "down", "falling", "red",
+"overbought", "> 70", "> 65", "divergence down", "breakdown",
+"lost", "death cross", "lower high"
+]
+if any(k in t for k in bullish_keywords): return "Bullish"
+if any(k in t for k in bearish_keywords): return "Bearish"
+if "rsi" in t and any(num in t for num in ["30", "35", "40"]): return "Bullish"
+if "rsi" in t and any(num in t for num in ["60", "65", "70"]): return "Bearish"
+if "macd" in t and "cross" in t:
+if "bullish" in t: return "Bullish"
+elif "bearish" in t: return "Bearish"
+if "volume delta" in t:
+if "negative" in t: return "Bearish"
+elif "positive" in t: return "Bullish"
+elif "red" in t: return "Bearish"
+elif "green" in t: return "Bullish"
+elif "surge" in t:
+if "bearish" in t: return "Bearish"
+else: return "Bullish"
+if "cumulative delta" in t:
+if "bearish" in t: return "Bearish"
+elif "bullish" in t: return "Bullish"
+if "pin bar" in t:
+if "bullish" in t: return "Bullish"
+elif "bearish" in t: return "Bearish"
+return "Neutral"
+
+conflict_penalty, penalty_type, bull_detail, bear_detail = calculate_conflict_penalty(
+pattern_names, pattern_to_indicator_mapping, indicator_weights, label_dir
+)
+
+print(f"[DEBUG] Conflict penalty: {conflict_penalty} ({penalty_type})")
+# Add penalty to total_score, if you wish:
+score_data['total_score'] = score_data.get('total_score', 0) + conflict_penalty
+score_data['conflict_penalty'] = conflict_penalty
+score_data['conflict_penalty_type'] = penalty_type
+score_data['bullish_patterns'] = bull_detail
+score_data['bearish_patterns'] = bear_detail
+
+print(f"[DEBUG] Confluence scoring output: Tier={score_data.get('confluence_tier')}, Score={score_data.get('total_score')}, Direction={score_data.get('direction')}")
+matched_patterns = [score_data]
+
+else:
+raise ValueError(f"Unknown indicator '{indicator}'. See docs for valid names.")
+
+df = clean_dataframe(df)
+df = df.astype({
+col: "float64" if df[col].dtype.kind in "fc" else "object"
+for col in df.columns
+})
+
+for p in matched_patterns:
+for k, v in p.items():
+if isinstance(v, (np.integer, np.floating)):
+p[k] = v.item()
+
+if indicator == "Confluence":
+first = matched_patterns[0] if matched_patterns else {}
+response = {
+"symbol": symbol,
+"interval": interval,
+"total_score": first.get("total_score", 0),
+"base_score": first.get("base_score", 0),
+"edge_score": first.get("edge_score", 0),
+"synergy_bonus": first.get("synergy_bonus", 0),
+"tier": first.get("confluence_tier", "No Match"),
+"direction": first.get("direction"),
+"matched_patterns": matched_patterns,
+"all_patterns": all_individual_patterns,
+"_data": df.tail(100).to_dict(orient="records"),
+# --- Conflict Penalty fields included ---
+"conflict_penalty": first.get("conflict_penalty", 0),
+"conflict_penalty_type": first.get("conflict_penalty_type", "none"),
+"bullish_patterns": first.get("bullish_patterns", []),
+"bearish_patterns": first.get("bearish_patterns", [])
+}
+else:
+response = {
+"symbol": symbol,
+"interval": interval,
+"indicator": indicator,
+"matched_patterns": matched_patterns,
+"_data": df.tail(100).to_dict(orient="records"),
+}
+if 'direction' not in df.columns:
+df['direction'] = np.sign(df['close'] - df['open'])
+mean_direction = df['direction'].mean()
+if mean_direction > 0:
+overall_direction = 'Bullish'
+elif mean_direction < 0:
+overall_direction = 'Bearish'
+else:
+overall_direction = 'Neutral'
+print(f"[DEBUG] Mean Direction: {mean_direction:.4f} ({overall_direction})")
+print(f"[DEBUG] Finished run_indicator_engine!\n")
+return response
