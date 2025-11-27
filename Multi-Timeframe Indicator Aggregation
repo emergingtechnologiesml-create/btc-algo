@@ -1,0 +1,16 @@
+def get_indicator_weights_for_timeframe(timeframe: str = "1d") -> dict:
+    category_map = {
+        "Momentum": ["RSI", "StochRSI", "MACD", "TSI/MESA", "Heikin-Ashi"],
+        "Volatility": ["Bollinger Bands", "Keltner Channels", "ATR", "Donchian Channels"],
+        "Volume": ["OBV", "Volume Delta", "VWAP"],
+        "Support/Resistance": ["Pivot Points", "Price-Action"],
+    }
+    cat_weights = get_adaptive_weights(timeframe)
+    indicator_weights = {}
+    for category, indicators in category_map.items():
+        for ind in indicators:
+            indicator_weights[ind] = {
+                "weight": cat_weights[category],
+                "category": category
+            }
+    return indicator_weights
