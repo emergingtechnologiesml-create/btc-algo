@@ -1,0 +1,30 @@
+{
+"indicators": [
+{
+"indicator": "RSI",
+"patterns": [
+{
+"pattern_name": "Bullish Divergence",
+"signal_type": "Bullish",
+"definition": "Price makes lower low while RSI makes higher low, indicating a potential reversal.",
+"trigger_logic": ["Price: Lower Low", "RSI: Higher Low"],
+"confidence_notes": "Statistically reliable when RSI is below 30 (oversold) and price forms clean swing lows. Granular: momentum starts to diverge from price, often showing buyer activity before price confirms. Easy version: RSI rising while price is still falling means downside is losing strength.",
+"tags": ["divergence", "oscillator", "reversal", "bullish"],
+"visual": "rsi_bullish_divergence.png",
+"backtest_accuracy": "72.5%",
+"ideal_timeframe": ["1H", "4H", "1D"],
+"volatility_context": "High Volatility Preferred",
+"works_best_in": ["Reversal Zones", "Oversold Conditions"],
+"expiration_bars": 15,
+"historical_win_rate": "67.1%",
+"average_r_multiple": "1.8R",
+"avg_move_%": "3.2%",
+"lookahead_bars": 20,
+"preferred_overlap": ["MACD Bullish Crossover", "VWAP Bounce", "Golden Cross"],
+"timeframe_validations": {
+"min_tf": "15m",
+"max_tf": "1D",
+"suggested_tf": ["4H", "1D"]
+}
+}
+}
