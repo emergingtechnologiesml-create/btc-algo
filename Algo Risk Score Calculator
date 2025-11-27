@@ -1,0 +1,49 @@
+def apply_risk_management_numba_v2(
+raw_positions, returns, cost_bps_fraction=0.0005,
+max_daily_loss=0.02, mdd_threshold=0.10,
+streak_k=3, streak_cut=0.6, mdd_min_mult=0.25,
+max_position=1.0
+):
+n = len(raw_positions)
+pos = raw_positions.copy()
+capital = 1.0
+peak = 1.0
+streak = 0
+for i in range(n):
+prev = 0.0 if i == 0 else pos[i-1]
+turnover = abs(pos[i] - prev)
+cost = turnover * cost_bps_fraction
+gross_ret = pos[i] * returns[i]
+day_ret = gross_ret - cost
+
+capital = capital * (1.0 + day_ret)
+if capital > peak:
+peak = capital
+mdd = (peak - capital) / peak if peak > 0 else 0.0
+
+if day_ret < -max_daily_loss:
+pos[i] *= 0.5
+
+streak = streak + 1 if day_ret < 0 else 0
+if streak >= streak_k:
+pos[i] *= streak_cut
+
+if mdd > mdd_threshold:
+x = min(1.0, (mdd - mdd_threshold) / max(mdd_threshold, 1e-9))
+scale = 1.0 - x * (1.0 - mdd_min_mult)
+pos[i] *= scale
+
+if pos[i] > max_position: pos[i] = max_position
+if pos[i] < -max_position: pos[i] = -max_position
+
+return pos
+
+def apply_risk_management(positions, returns, bps, max_daily_loss=0.02, mdd_threshold=0.10,
+streak_k=3, streak_cut=0.6, mdd_min_mult=0.25, max_position=1.0):
+return apply_risk_management_numba_v2(
+np.asarray(positions), np.asarray(returns),
+cost_bps_fraction=bps/1e4,
+max_daily_loss=max_daily_loss, mdd_threshold=mdd_threshold,
+streak_k=streak_k, streak_cut=streak_cut,
+mdd_min_mult=mdd_min_mult, max_position=max_position
+)
