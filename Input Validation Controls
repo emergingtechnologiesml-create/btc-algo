@@ -1,0 +1,5 @@
+if "close" not in df.columns:
+    raise ValueError("Missing ‘close’ column in OHLCV data. Check the data source.")
+
+if 'close' not in df.columns:
+    raise ValueError("DataFrame must contain a 'close' column.")
