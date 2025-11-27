@@ -1,0 +1,9 @@
+from fastapi import FastAPI
+from trading_pattern_engine1.api.routes import patterns
+
+app = FastAPI(
+    title="BTC Pattern Engine",
+    description="REST API for indicator pattern detection and confluence scoring"
+)
+
+app.include_router(patterns.router, prefix="/patterns")
