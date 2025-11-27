@@ -1,0 +1,13 @@
+tscv = TimeSeriesSplit(n_splits=5)
+all_reports = []
+
+for fold, (train_idx, test_idx) in enumerate(tscv.split(X)):
+    X_train, X_test = X[train_idx], X[test_idx]
+    y_train, y_test = y[train_idx], y[test_idx]
+
+    clf = CalibratedClassifierCV(base_estimator=base_model, cv=3)
+    clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+
+    report = classification_report(y_test, y_pred, output_dict=True)
+    all_reports.append(report)
