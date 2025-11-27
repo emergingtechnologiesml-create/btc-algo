@@ -1,0 +1,16 @@
+import json
+import os
+
+# Get the absolute path to the patterns directory
+PATTERNS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "patterns")
+
+def load_rsi_patterns_by_indicator(indicator_name: str, filepath=None):
+if filepath is None:
+filepath = os.path.join(PATTERNS_DIR, "indicator_rsi.json")
+
+with open(filepath, "r") as f:
+data = json.load(f)
+for indicator in data.get("indicators", []):
+if indicator.get("indicator", "").upper() == indicator_name.upper():
+return indicator.get("patterns", [])
+return []
