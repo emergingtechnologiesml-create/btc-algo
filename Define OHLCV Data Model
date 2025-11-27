@@ -1,0 +1,43 @@
+import requests
+import pandas as pd
+
+def fetch_ohlcv(symbol="BTCUSDT", interval=None, limit=None) -> pd.DataFrame:
+"""
+Fetches OHLCV data from Binance exchange and returns a normalized DataFrame.
+"""
+url = "https://api.binance.com/api/v3/klines"
+params = {
+"symbol": symbol,
+"interval": interval,
+"limit": limit
+}
+
+response = requests.get(url, params=params)
+if response.status_code != 200:
+raise Exception(f"Binance API Error: {response.status_code} - {response.text}")
+
+raw = response.json()
+df = pd.DataFrame(raw, columns=[
+"timestamp", "open", "high", "low", "close", "volume",
+"close_time", "quote_asset_volume", "num_trades",
+"taker_buy_base_volume", "taker_buy_quote_volume", "ignore"
+])
+
+df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
+
+df = df.astype({
+"open": float,
+"high": float,
+"low": float,
+"close": float,
+"volume": float,
+"quote_asset_volume": float
+})
+
+df = df[["timestamp", "open", "high", "low", "close", "volume", "quote_asset_volume"]]
+df.rename(columns={"quote_asset_volume": "quote_volume_usd"}, inplace=True)
+
+print("Sample Binance Candles:")
+print(df.head(60))
+
+return df
