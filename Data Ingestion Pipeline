@@ -1,0 +1,7 @@
+df = pd.DataFrame(ohlcv_data) if ohlcv_data is not None else fetch_ohlcv(symbol, interval, limit)
+df = clean_dataframe(df)
+print(f"[DEBUG] Data loaded, columns: {df.columns.tolist()}, shape: {df.shape}")
+print(df.head(3))
+
+The ingestion pipeline =
+Fetch → Convert → Clean → Normalize → Send to indicator engine
