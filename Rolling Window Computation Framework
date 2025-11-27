@@ -1,0 +1,4 @@
+highest_high = df["high"].rolling(window=N).max().iloc[-2]
+lowest_low  = df["low"].rolling(window=N).min().iloc[-2]
+
+df['upper_band'], df['lower_band'], df['middle_channel'] = compute_donchian(df, N)
