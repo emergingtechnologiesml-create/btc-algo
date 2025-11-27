@@ -1,0 +1,11 @@
+def run_indicator_engine(config: dict):
+    print("\n[DEBUG] Starting run_indicator_engine...")
+    print(f"[DEBUG] Config: symbol={symbol}, interval={interval}, limit={limit}, indicator={indicator}")
+    ...
+    print(f"[DEBUG] Data loaded, columns: {df.columns.tolist()}, shape: {df.shape}")
+
+def calculate_conflict_penalty(validated_patterns, pattern_to_indicator_mapping, indicator_weights, label_dir):
+    print("\n==== CONFLICT PENALTY DEBUG ====")
+    print(f"Validated patterns (for conflict check): {validated_patterns}")
+    ...
+    print(f"  [RESULT] Conflict Penalty Applied: {penalty} ({typ})")
