@@ -1,0 +1,38 @@
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import argparse
+from core.data_loader import fetch_ohlcv
+from core.backtest import backtest_patterns
+from core.json_engine import clean_dataframe
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+def main():
+parser = argparse.ArgumentParser(description="Run backtest for pattern detection.")
+parser.add_argument("--symbol", default="BTCUSDT", help="Trading pair symbol")
+parser.add_argument("--interval", default="1h", help="Candle interval (e.g. 1h, 15m, 1d)")
+parser.add_argument("--limit", type=int, default=500, help="Number of candles to fetch")
+parser.add_argument("--indicator", required=True, help="Indicator to test (e.g. RSI, MACD, OBV, etc.)")
+parser.add_argument("--pattern", required=True, help="Pattern name to backtest (case sensitive match)")
+
+args = parser.parse_args()
+
+print(f"Fetching OHLCV data for {args.symbol} ({args.interval})...")
+df = fetch_ohlcv(symbol=args.symbol, interval=args.interval, limit=args.limit)
+df = clean_dataframe(df)
+
+print(f"Running backtest on indicator: {args.indicator} | Pattern: {args.pattern}")
+result = backtest_patterns(df, indicator=args.indicator, target_pattern=args.pattern)
+
+print("Backtest Summary:")
+print(f"Pattern : {result['pattern']}")
+print(f"Trades Executed : {result['trades']}")
+print(f"Wins : {result['wins']}")
+print(f"Losses : {result['losses']}")
+print(f"Win Rate : {result['win_rate']}%")
+print(f"Average Return : {result['average_return_%']}%")
+
+if __name__ == "__main__":
+main()
