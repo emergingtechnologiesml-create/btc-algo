@@ -1,0 +1,34 @@
+def analyze_indicators(df: pd.DataFrame, all_matched_patterns: Dict[str, List[Dict]]) -> Dict[str, Any]:
+"""
+Analyze indicators and calculate weights based on matched patterns.
+
+Args:
+df: DataFrame with price data
+all_matched_patterns: Dictionary of matched patterns by indicator
+
+Returns:
+Dictionary with analysis results
+"""
+analyzer = IndicatorAnalyzer(patterns_dir="patterns")
+results = analyzer.analyze_market_conditions(df, all_matched_patterns)
+
+# Print results
+print("\n=== MARKET ANALYSIS ===")
+print(f"Market Bias: {results['market_bias']}")
+print(f"Market Context: {results['market_context']}")
+print(f"Overall Strength: {results['strength_score']:.4f}")
+
+print("\n=== CATEGORY SCORES ===")
+for category, score in results['category_scores'].items():
+print(f"{category.replace('_', ' ').title()}: {score:.4f}")
+
+print("\n=== TOP INDICATORS ===")
+sorted_indicators = sorted(
+results['indicator_weights'].items(),
+key=lambda x: x[1]['total'],
+reverse=True
+)
+for indicator, weights in sorted_indicators[:5]:
+print(f"{indicator}: {weights['total']:.4f}")
+
+return results
