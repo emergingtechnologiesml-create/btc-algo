@@ -1,0 +1,90 @@
+def check_rsi_patterns(df: pd.DataFrame) -> list:
+"""
+This function checks for RSI patterns in the given DataFrame.
+"""
+patterns = []
+
+if 'RSI' not in df.columns:
+print("RSI column is missing. Running compute_rsi.")
+df["RSI"] = compute_rsi(df['close'])
+
+loaded_patterns = load_rsi_patterns_by_indicator("RSI")
+rsi = df['RSI']
+
+print(f"Data for pattern checking: \n{df.tail(10)}\n")
+
+for pattern in loaded_patterns:
+print(f"Checking pattern: {pattern['pattern_name']}")
+
+if len(df) < 5:
+print("Insufficient data for pattern check.")
+continue
+
+# --------------------- Divergences ---------------------
+if pattern['pattern_name'] == "Bullish Divergence":
+print("Checking Bullish Divergence pattern...")
+if is_lower_low(df['close']) and is_higher_low(df['RSI']):
+patterns.append(pattern)
+print("Pattern Detected: Bullish Divergence")
+
+elif pattern['pattern_name'] == "Bearish Divergence":
+print("Checking Bearish Divergence pattern...")
+if is_higher_high(df['close']) and is_lower_high(df['RSI']):
+patterns.append(pattern)
+print("Pattern Detected: Bearish Divergence")
+
+# --------------------- RSI Level Crosses ---------------------
+elif pattern['pattern_name'] == "Overbought":
+if rsi.iloc[-2] <= 70 and rsi.iloc[-1] > 70:
+patterns.append(pattern)
+print("Pattern Detected: Overbought")
+
+elif pattern['pattern_name'] == "Oversold":
+if rsi.iloc[-2] >= 30 and rsi.iloc[-1] < 30:
+patterns.append(pattern)
+print("Pattern Detected: Oversold")
+
+elif pattern['pattern_name'] == "RSI > 70":
+# Trigger: RSI crosses above 70 from below or equal to 70
+if rsi.iloc[-2] <= 70 and rsi.iloc[-1] > 70:
+patterns.append(pattern)
+print("Pattern Detected: RSI > 70")
+
+elif pattern['pattern_name'] == "RSI < 30":
+if rsi.iloc[-2] >= 30 and rsi.iloc[-1] < 30:
+patterns.append(pattern)
+print("Pattern Detected: RSI < 30")
+
+elif pattern['pattern_name'] == "RSI < 35":
+if rsi.iloc[-2] >= 35 and rsi.iloc[-1] < 35:
+patterns.append(pattern)
+print("Pattern Detected: RSI < 35")
+
+elif pattern['pattern_name'] == "RSI > 65":
+if rsi.iloc[-2] <= 65 and rsi.iloc[-1] > 65:
+patterns.append(pattern)
+print("Pattern Detected: RSI > 65")
+
+# --------------------- Centerline Crosses ---------------------
+elif pattern['pattern_name'] == "Centerline Cross – Bullish":
+if rsi.iloc[-2] < 50 and rsi.iloc[-1] > 50:
+patterns.append(pattern)
+print("Pattern Detected: Centerline Cross – Bullish")
+
+elif pattern['pattern_name'] == "Centerline Cross – Bearish":
+if rsi.iloc[-2] > 50 and rsi.iloc[-1] < 50:
+patterns.append(pattern)
+print("Pattern Detected: Centerline Cross – Bearish")
+
+# --------------------- Failure Swings ---------------------
+elif rsi.iloc[-3] < rsi.iloc[-4] and rsi.iloc[-3] < 30: # forms a higher low
+if rsi.iloc[-1] > rsi.iloc[-2] and rsi.iloc[-1] > rsi.iloc[-4]: # breaks previous high
+patterns.append(pattern)
+print("Pattern Detected: Failure Swing – Bullish")
+
+elif rsi.iloc[-3] > rsi.iloc[-4] and rsi.iloc[-3] > 70: # forms a lower high
+if rsi.iloc[-1] < rsi.iloc[-2] and rsi.iloc[-1] < rsi.iloc[-4]: # breaks previous low
+patterns.append(pattern)
+print("Pattern Detected: Failure Swing – Bearish")
+
+return patterns
