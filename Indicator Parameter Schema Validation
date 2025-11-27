@@ -1,0 +1,4 @@
+try:
+    N = int(config.get("donchian_period", 20))
+except (TypeError, ValueError):
+    N = 20
