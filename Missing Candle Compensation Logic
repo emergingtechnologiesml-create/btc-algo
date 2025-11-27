@@ -1,0 +1,11 @@
+ret_std_by_hour = (
+    df.groupby('hour', group_keys=False)
+      .apply(lambda g: g['ret_past'].expanding().std().shift(1))
+)
+
+ret_std_by_hour_mean = (
+    ret_std_by_hour.groupby(df['hour'], group_keys=False)
+                   .apply(lambda g: g.expanding().mean())
+)
+df['intraday_vol_factor'] = ret_std_by_hour / ret_std_by_hour_mean
+df['intraday_vol_factor'] = df['intraday_vol_factor'].replace([np.inf, -np.inf], np.nan)
