@@ -1,0 +1,4 @@
+pos = np.where(np.abs(positions) < eps, 0.0, positions)
+sign = np.sign(pos)
+changes = np.diff(sign)
+entries = ((changes != 0) & (sign[1:] != 0)).sum()
