@@ -1,0 +1,5 @@
+if name == "Price Touches Upper Band":
+    match = df.at[last_idx, "close"] >= df.at[last_idx, "upper_band"]
+
+elif name == "Price Touches Lower Band":
+    match = df.at[last_idx, "close"] <= df.at[last_idx, "lower_band"]
