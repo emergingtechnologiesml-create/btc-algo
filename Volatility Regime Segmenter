@@ -1,0 +1,15 @@
+# Returns & Volatility
+# ----------------
+# Forward return = next-bar return (label target)
+df['ret_fwd'] = df['close'].pct_change().shift(-1)
+# Past returns for volatility calculation (causal)
+ret_past = df['close'].pct_change()
+# Volatility estimation (causal)
+if vol_mode == 'rolling':
+vol = ret_past.rolling(vol_window, min_periods=max(5, vol_window // 3)).std().shift(1)
+elif vol_mode == 'ewma':
+hl = (ewma_halflife or vol_window)
+vol = ewma_volatility(ret_past, halflife=hl, min_periods=max(5, vol_window // 3))
+else: # blend
+vr = ret_past.rolling(vol_window, min_periods=max(5, vol_window // 3)).std().shift(1)
+ve = ewma_volatility(ret_past, halflife=(ewma_halflife or vol_window), min_periods=max(5, vol_window // 3))
