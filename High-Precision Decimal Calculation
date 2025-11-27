@@ -1,0 +1,6 @@
+r = np.asarray(buf_ret)[-trend_window:]
+v = np.asarray(buf_vol)[-trend_window:]
+v_mean = np.nanmean(v) if np.isfinite(v).any() else 1.0
+cum_ret = np.nansum(r)
+n = np.sum(~np.isnan(r))
+trend_strength = (abs(cum_ret) / (v_mean * np.sqrt(max(n, 1)))) if v_mean and n else 0.0
