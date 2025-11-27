@@ -1,0 +1,3 @@
+equity = (1 + df['std_ret_fwd']).cumprod()
+rolling_max = equity.cummax()
+drawdown = (equity - rolling_max) / rolling_ma
