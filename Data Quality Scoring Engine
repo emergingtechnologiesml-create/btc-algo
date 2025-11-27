@@ -1,0 +1,10 @@
+z_cols = []
+for c in ['volume_price_corr', 'intraday_vol_factor', 'price_impact']:
+    if c in df.columns:
+        df[f'{c}_z'] = rolling_zscore(df[c], window=max(120, window*5), min_periods=max(30, window))
+        z_cols.append(f'{c}_z')
+
+if z_cols:
+    df['confluence_score_2'] = df[z_cols].mean(axis=1, skipna=True)
+else:
+    df['confluence_score_2'] = np.nan
