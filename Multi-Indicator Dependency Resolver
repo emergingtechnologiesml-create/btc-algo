@@ -1,0 +1,11 @@
+elif name == "Bollinger Upper Tag":
+    rsi_cond = "rsi" in df.columns and df.at[prev_idx, "rsi"] > 70
+    macd_cond = (
+        "macd" in df.columns and "macd_signal" in df.columns and
+        df.at[prev_idx, "macd"] < df.at[prev_idx, "macd_signal"]
+    )
+    match = (
+        df.at[prev_idx, "close"] >= df.at[prev_idx, "upper_band"]
+        and df.at[last_idx, "close"] <= df.at[prev_idx, "close"]
+        and (rsi_cond or macd_cond)
+    )
