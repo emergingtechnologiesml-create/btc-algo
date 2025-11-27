@@ -1,0 +1,7 @@
+df = clean_dataframe(df)
+
+for col in df.columns:
+    if df[col].dtype in ['float64', 'float32']:
+        df[col] = df[col].apply(
+            lambda x: 0 if (np.isnan(x) or np.isinf(x)) else x
+        )
