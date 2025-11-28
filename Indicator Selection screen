@@ -1,0 +1,18 @@
+# --- Indicator Selection Screen ---
+import streamlit as st
+
+st.subheader("Indicator Selection")
+
+available_indicators = [
+    "RSI", "MACD", "Bollinger Bands", "Keltner Channels",
+    "ATR", "StochRSI", "OBV", "VWAP"
+]
+
+selected = st.multiselect(
+    "Choose Indicators to Enable",
+    options=available_indicators,
+    default=["RSI", "MACD"]
+)
+
+st.write("Active Indicators:", selected)
+st.session_state["active_indicators"] = selected
