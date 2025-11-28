@@ -1,0 +1,11 @@
+def detect_duplicate_candles(df):
+    # Check duplicates by timestamp
+    dup_ts = df.index.duplicated(keep="first")
+
+    # Check duplicates by identical OHLCV values
+    dup_values = df.duplicated(subset=["open", "high", "low", "close", "volume"])
+
+    df["duplicate_flag"] = dup_ts | dup_values
+
+    print(f"[DUP-CHECK] {df['duplicate_flag'].sum()} duplicate candles detected")
+    return df
