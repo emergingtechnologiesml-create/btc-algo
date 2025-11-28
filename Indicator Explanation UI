@@ -1,0 +1,20 @@
+# --- Indicator Explanation UI ---
+indicator_info = {
+    "RSI": """
+    RSI measures momentum and identifies overbought (>70) or oversold (<30) zones.
+    A rising RSI suggests increasing strength; a falling RSI implies weakening momentum.
+    """,
+    "MACD": """
+    MACD compares short-term vs long-term trend momentum.
+    Bullish Crossover = MACD > Signal; Bearish Crossover = MACD < Signal.
+    """,
+    "Bollinger Bands": """
+    Bands expand during volatility and contract during consolidation.
+    Price touching the upper band may signal overextension.
+    """
+}
+
+st.subheader("Indicator Explanation")
+for ind in st.session_state.get("active_indicators", []):
+    st.markdown(f"### 📘 {ind}")
+    st.markdown(indicator_info.get(ind, "No explanation available."))
