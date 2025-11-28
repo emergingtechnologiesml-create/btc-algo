@@ -1,0 +1,17 @@
+def enhanced_equity_curve_numba(positions, returns, cost_bps, compound=True):
+n = len(positions)
+pos_prev = np.zeros(n)
+pos_prev[1:] = positions[:-1]
+turnover = np.abs(positions - pos_prev)
+costs = turnover * cost_bps / 1e4
+raw_pnl = positions * returns
+net_pnl = raw_pnl - costs
+equity_curve = np.zeros(n)
+if compound:
+equity_curve[0] = 1 + net_pnl[0]
+for i in range(1, n):
+equity_curve[i] = equity_curve[i-1] * (1 + net_pnl[i])
+equity_curve -= 1
+else:
+equity_curve = np.cumsum(net_pnl)
+return equity_curve, net_pnl, turnover, costs
