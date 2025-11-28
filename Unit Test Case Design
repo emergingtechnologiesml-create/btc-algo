@@ -1,0 +1,29 @@
+# tests/test_rsi_pattern.py
+import pandas as pd
+from trading_pattern_engine1.core.pattern_detector import detect_rsi_patterns
+
+def test_rsi_overbought_signal():
+    df = pd.DataFrame({"rsi": [65, 68, 72]})  # Rising above 70
+    patterns = detect_rsi_patterns(df)
+
+    assert "Overbought" in patterns
+    assert "Oversold" not in patterns
+
+# tests/test_indicator_api.py
+from fastapi.testclient import TestClient
+from trading_pattern_engine1.main import app
+
+client = TestClient(app)
+
+def test_indicator_aggregation_api():
+    payload = {
+        "symbol": "BTCUSDT",
+        "interval": "1h",
+        "limit": 50,
+        "indicators": ["RSI"]
+    }
+    response = client.post("/patterns/aggregate", json=payload)
+    data = response.json()
+
+    assert response.status_code == 200
+    assert "RSI" in data["indicators"]
