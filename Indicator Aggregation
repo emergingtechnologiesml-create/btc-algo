@@ -1,0 +1,28 @@
+# --- Indicator Aggregation API ---
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from trading_pattern_engine1.core.indicator_engine import compute_indicators
+from .deps import get_df  # your OHLCV loader
+
+router = APIRouter()
+
+class IndicatorRequest(BaseModel):
+    indicators: list[str]
+    symbol: str = "BTCUSDT"
+    interval: str = "1h"
+    limit: int = 500
+
+@router.post("/aggregate")
+def aggregate_indicators(payload: IndicatorRequest):
+    df = get_df(payload.symbol, payload.interval, payload.limit)
+
+    results = {}
+    for ind in payload.indicators:
+        ind_df = compute_indicators(df.copy(), ind)  # indicator-specific engine
+        results[ind] = ind_df.tail(1).to_dict(orient="records")[0]
+
+    return {
+        "symbol": payload.symbol,
+        "interval": payload.interval,
+        "indicators": results
+    }
