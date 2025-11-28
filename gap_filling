@@ -1,0 +1,14 @@
+def fill_gaps_and_interpolate(df, interval="1min"):
+    # Reindex to full time range → creates NaNs where candles are missing
+    full_range = pd.date_range(start=df.index.min(), end=df.index.max(), freq=interval)
+    df = df.reindex(full_range)
+
+    # Forward-fill OHLC values, interpolate volume where needed
+    df["close"]  = df["close"].ffill()
+    df["open"]   = df["open"].fillna(df["close"])      # reasonable fallback
+    df["high"]   = df["high"].ffill()
+    df["low"]    = df["low"].ffill()
+    df["volume"] = df["volume"].interpolate(method="linear")
+
+    print(f"[GAP-FILL] gaps filled: {df.isna().any(axis=1).sum()}")
+    return df
